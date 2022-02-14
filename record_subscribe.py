@@ -1,49 +1,55 @@
-import paho.mqtt.client as mqtt
+# import paho.mqtt.client as mqtt
 
-# Called when the broker responds to our connection request
-def on_connect(client,userdata,flags,rc):
-  print("Connected - rc:",rc)
+# BROKER_ADDRESS = "localhost"
+# BROKER_PORT = 1883
+# FLAG = True
+# PUBTOP = "/device/record2"
+# SUBTOP = "/device/record1"
+# chat = None
 
-
-# Called when a message has been received on a topic that the client has subscirbed to.
-def on_message(client, userdata, message):
-  global FLAG
-  if str(message.topic) != pubtop:
-    msg = message.payload.decode("utf-8")
-    if str(msg) == '':
-      FLAG = False
-    print(str(message.topic),type(msg))
-
-# Called when the client disconnects from the broker
-def on_disconnect(client,userdata,rc):
-  if rc != 0:
-    print("Unexpected Disconnection")
+# # Called when the broker responds to our connection request
+# def on_connect(client,userdata,flags,rc):
+#   if rc == 0:
+#     FLAG = True
+#     print(f"Connected to {BROKER_ADDRESS} with port {BROKER_PORT} successfully!") 
+#   else:
+#     print("Bad connection Returned code=",rc)  
 
 
-broker_address = "localhost"
-port = 1883
+# # Called when a message has been received on a topic that the client has subscirbed to.
+# def on_message(client, userdata, message):
+#   if str(message.topic) != PUBTOP:
+#     msg = message.payload.decode("utf-8")
+#     print(str(message.topic),msg)
 
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
+# # Called when the client disconnects from the broker
+# def on_disconnect(client,userdata,rc):
+#   if rc != 0:
+#     FLAG = False
+#     print("Unexpected Disconnection")
 
-try:
-  client.connect(broker_address, port)
-except Exception as e:
-  print('Failed to connect to MQTT broker"')
+# client = mqtt.Client()
+# client.connect(BROKER_ADDRESS, BROKER_PORT)
+# client.on_connect = on_connect
+
+# client.subscribe(SUBTOP)
+# client.on_message = on_message
 
 
-pubtop = "/device/record2"
-subtop = "/device/record1"
-FLAG = True
-chat = None
+# client.loop_forever()
 
-client.loop_start()
-client.subscribe(subtop)
+from utils import *
+def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print(f"Connected to {BROKER_URL} with port {PORT} successfully!")
+            subscribe(client)
+        else:
+            print(f"Failed to connect, return code %d\n", rc)
+def run():
+    client = connect_mqtt()
+    client.on_connect = on_connect
+    client.loop_forever()
 
-while True:
-  if FLAG == False:
-    break
 
-client.disconnect()
-client.loop_stop()
+if __name__ == '__main__':
+    run()
